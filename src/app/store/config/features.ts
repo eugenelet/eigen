@@ -194,6 +194,11 @@ export const features = defineFeatures({
     description: "Show share button in auction screen",
     showInAdminMenu: true,
   },
+  ARShowMyCollectionInsights: {
+    readyForRelease: false,
+    description: "Enable my collection insights tab",
+    showInAdminMenu: true,
+  },
 })
 
 export interface DevToggleDescriptor {
