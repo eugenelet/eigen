@@ -3,7 +3,7 @@ import { SaleHeader_sale } from "__generated__/SaleHeader_sale.graphql"
 import { CustomShareSheet, CustomShareSheetItem } from "app/Components/CustomShareSheet"
 import { getShareURL } from "app/Components/ShareSheet/helpers"
 import { useToast } from "app/Components/Toast/toastHook"
-import { saleTime } from "app/utils/saleTime"
+import { getCascadingEndTimeFeatureSaleDetails, saleTime } from "app/utils/saleTime"
 import { useScreenDimensions } from "app/utils/useScreenDimensions"
 import moment from "moment"
 import { Flex, LinkIcon, MoreIcon, ShareIcon, Text, Touchable } from "palette"
@@ -33,6 +33,8 @@ export const SaleHeader: React.FC<Props> = ({ sale, scrollAnim }) => {
 
   const saleTimeDetails = saleTime(sale)
 
+  const cascadingEndTimeFeatureSaleDetails = getCascadingEndTimeFeatureSaleDetails(sale)
+
   const handleCopyLinkPress = () => {
     const clipboardLink = getShareURL(sale.href!)
 
@@ -57,7 +59,9 @@ export const SaleHeader: React.FC<Props> = ({ sale, scrollAnim }) => {
       setShareSheetVisible(false)
     }
   }
-  const cascadingEndTimeFeatureEnabled = useFeatureFlag("AREnableCascadingEndTimerSalePageDetails")
+  const cascadingEndTimeFeatureEnabled =
+    useFeatureFlag("AREnableCascadingEndTimerSalePageDetails") &&
+    sale.cascadingEndTimeIntervalMinutes
 
   return (
     <>
@@ -91,7 +95,7 @@ export const SaleHeader: React.FC<Props> = ({ sale, scrollAnim }) => {
                 height: COVER_IMAGE_HEIGHT,
               }}
             />
-            {!!sale.endAt && !!moment().isAfter(sale.endAt) && (
+            {!!sale.endAt && !!moment().isAfter(sale.endAt) && !cascadingEndTimeFeatureEnabled && (
               <Flex
                 style={{
                   position: "absolute",
@@ -144,16 +148,14 @@ export const SaleHeader: React.FC<Props> = ({ sale, scrollAnim }) => {
           </Flex>
           {cascadingEndTimeFeatureEnabled ? (
             <>
-              <Flex my="1">
-                {saleTimeDetails.absolute !== null && (
-                  <Text style={{ fontWeight: "bold" }} variant="sm">
-                    {saleTimeDetails.absolute}
+              <Flex mb="1" mt="2">
+                {!!cascadingEndTimeFeatureSaleDetails.relative && (
+                  <Text variant="sm" color={cascadingEndTimeFeatureSaleDetails.relative.color}>
+                    {cascadingEndTimeFeatureSaleDetails.relative.copy}
                   </Text>
                 )}
-                {!!saleTimeDetails.relative && (
-                  <Text variant="sm" color="black60">
-                    {saleTimeDetails.relative}
-                  </Text>
+                {!!cascadingEndTimeFeatureSaleDetails.absolute && (
+                  <Text variant="sm">{cascadingEndTimeFeatureSaleDetails.absolute}</Text>
                 )}
               </Flex>
               {!!sale.cascadingEndTimeIntervalMinutes && (
@@ -203,6 +205,7 @@ export const SaleHeaderContainer = createFragmentContainer(SaleHeader, {
       slug
       liveStartAt
       endAt
+      endedAt
       startAt
       timeZone
       cascadingEndTimeIntervalMinutes
