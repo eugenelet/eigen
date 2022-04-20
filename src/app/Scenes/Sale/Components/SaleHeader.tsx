@@ -57,9 +57,7 @@ export const SaleHeader: React.FC<Props> = ({ sale, scrollAnim }) => {
       setShareSheetVisible(false)
     }
   }
-  const cascadingEndTimeFeatureEnabled = !useFeatureFlag(
-    "ARDisableCascadingEndTimerSalePageDetails"
-  )
+  const cascadingEndTimeFeatureEnabled = useFeatureFlag("AREnableCascadingEndTimerSalePageDetails")
 
   return (
     <>
