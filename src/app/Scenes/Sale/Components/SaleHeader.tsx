@@ -57,6 +57,9 @@ export const SaleHeader: React.FC<Props> = ({ sale, scrollAnim }) => {
       setShareSheetVisible(false)
     }
   }
+  const cascadingEndTimeFeatureEnabled = !useFeatureFlag(
+    "ARDisableCascadingEndTimerSalePageDetails"
+  )
 
   return (
     <>
@@ -141,18 +144,42 @@ export const SaleHeader: React.FC<Props> = ({ sale, scrollAnim }) => {
               </Touchable>
             )}
           </Flex>
-          <Flex my="1">
-            {saleTimeDetails.absolute !== null && (
-              <Text style={{ fontWeight: "bold" }} variant="sm">
-                {saleTimeDetails.absolute}
-              </Text>
-            )}
-            {!!saleTimeDetails.relative && (
-              <Text variant="sm" color="black60">
-                {saleTimeDetails.relative}
-              </Text>
-            )}
-          </Flex>
+          {cascadingEndTimeFeatureEnabled ? (
+            <>
+              <Flex my="1">
+                {saleTimeDetails.absolute !== null && (
+                  <Text style={{ fontWeight: "bold" }} variant="sm">
+                    {saleTimeDetails.absolute}
+                  </Text>
+                )}
+                {!!saleTimeDetails.relative && (
+                  <Text variant="sm" color="black60">
+                    {saleTimeDetails.relative}
+                  </Text>
+                )}
+              </Flex>
+              {!!sale.cascadingEndTimeIntervalMinutes && (
+                <Text
+                  variant="xs"
+                  mb={2}
+                >{`Lots close at ${sale.cascadingEndTimeIntervalMinutes}-minute intervals`}</Text>
+              )}
+            </>
+          ) : (
+            <Flex my="1">
+              {saleTimeDetails.absolute !== null && (
+                <Text style={{ fontWeight: "bold" }} variant="sm">
+                  {saleTimeDetails.absolute}
+                </Text>
+              )}
+              {!!saleTimeDetails.relative && (
+                <Text variant="sm" color="black60">
+                  {saleTimeDetails.relative}
+                </Text>
+              )}
+            </Flex>
+          )}
+
           <CaretButton
             text="More info about this auction"
             onPress={() => {
@@ -180,6 +207,7 @@ export const SaleHeaderContainer = createFragmentContainer(SaleHeader, {
       endAt
       startAt
       timeZone
+      cascadingEndTimeIntervalMinutes
       coverImage {
         url
       }
